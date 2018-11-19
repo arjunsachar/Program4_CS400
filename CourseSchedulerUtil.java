@@ -45,6 +45,7 @@ public class CourseSchedulerUtil<T> {
         this.graphImpl = new GraphImpl<T>();
     }
     
+    
     /**
     * createEntity method is for parsing the input json file 
     * @return array of Entity object which stores information 
@@ -60,26 +61,27 @@ public class CourseSchedulerUtil<T> {
         		Object obj = parser.parse(new FileReader(fileName));
         		JSONObject jsonObject = (JSONObject) obj;
         		
-        		JSONArray  courseArray = (JSONArray) jsonObject.get("courses");
+        		JSONArray courseArray = (JSONArray) jsonObject.get("courses");
         		
         		Iterator<String> iterator = courseArray.iterator();
         		
-        		Entity[] courseInfoArray = new Entity[16];
+        		Entity[] courseInfoArray = new Entity[100];
         		
         		int counter = 0;
         		
         		while (iterator.hasNext()) {
+        			iterator.next();
         			
-        			
-        			Entity newEnt = new Entity();
+        			Entity<String> newEnt = new Entity<String>();
         			
         			String course = (String) jsonObject.get("name");
-        			
-        			prerequisites = (T[]) jsonObject.get("prerequisites");
+        			System.out.println("COURse :" + course);
+        			prerequisites = (T[])jsonObject.get("prerequisites");
         			
         			newEnt.setName(course);
+        			System.out.println("setName :" + newEnt.getName());
         			
-        			newEnt.setPrerequisites(prerequisites);
+        			newEnt.setPrerequisites((String[])prerequisites);
         			
         			courseInfoArray[counter] = newEnt;
         			
@@ -88,6 +90,14 @@ public class CourseSchedulerUtil<T> {
         			
         		}
         		
+        		// TESTING REMOVE LATER
+        		Entity[] finalCourseArray = null;
+        		for(int i = 0; i < courseInfoArray.length; ++i){
+        		    if(courseInfoArray[i] != null){
+                        System.out.println(courseInfoArray[i]);
+        		    }
+
+        		}
         		return courseInfoArray;
         		
         	
