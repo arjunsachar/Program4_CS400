@@ -52,14 +52,18 @@ public class GraphImpl<T> implements GraphADT<T> {
     }
 
     public void removeVertex(T vertex) {
-        //TODO: implement this method
-        //TODO: FIND OUT HOW TO REMOVE PREDECESSORS
         if(vertex != null && hasVertex(vertex)){
             // Removes the edges that are prerequisites of vertex
-            for(T vertexAdj : verticesMap.get(vertex)){
-                removeEdge(vertex, vertexAdj);
+            for(int i = 0; i < verticesMap.get(vertex).size(); ++i){
+                removeEdge(vertex, verticesMap.get(vertex).get(i));
             }
-            // TODO: Removes the edges that have vertex as a prerequisites
+            // Removes the edges that have vertex as a prerequisites
+            T[] vertArray = (T[])getAllVertices().toArray();
+            for(int i = 0; i < vertArray.length; ++i){
+                if(verticesMap.get(vertArray[i]).contains(vertex)){
+                    removeEdge(vertArray[i], vertex);
+                }
+            }
             verticesMap.remove(vertex);    
             --order;
         }
