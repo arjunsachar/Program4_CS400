@@ -148,17 +148,67 @@ public class CourseSchedulerUtil<T> {
         return null;
     }
     
-    
-    /**
+  /**
      * To check whether all given courses can be completed or not
      * @return boolean true if all given courses can be completed,
      * otherwise false
      * @throws Exception
      */
     public boolean canCoursesBeCompleted() throws Exception {
-        //TODO: implement this method
-        return false;
+    	    Set<T> keySet = this.graphImpl.getAllVertices();
+        
+        int numCourses = keySet.size();
+    	
+    		// Mark all the vertices as not visited and 
+        // not part of recursion stack 
+        boolean[] visited = new boolean[numCourses]; 
+        boolean[] recStack = new boolean[numCourses]; 
+        
+        Iterator<T> courseIterator = keySet.iterator();
+          
+        // Call the recursive helper function to 
+        // detect cycle in different DFS trees 
+        for (int i = 0; i < numCourses; i++) {
+        		
+        		T newCourse = courseIterator.next();
+        	
+            if (canCoursesBeCompletedUtil(newCourse, visited, recStack, i)) { 
+                return true; 
+            }
+        }
+  
+        return false; 
 
+
+    }
+    
+    private boolean canCoursesBeCompletedUtil(T course, boolean[] visited, boolean[] recStack, int counter) {
+    		if (recStack[counter]) {
+             return true;
+    		}
+   
+         if (visited[counter]) {
+             return false;
+         }
+               
+         visited[counter] = true; 
+   
+         recStack[counter] = true; 
+         
+         
+         List<T> children = this.graphImpl.getAdjacentVerticesOf(course); 
+           
+         for (T i: children) {
+        	 	counter++;
+             if (canCoursesBeCompletedUtil(i, visited, recStack, counter)) {
+                 return true; 
+             }
+         }
+                   
+         recStack[counter] = false; 
+   
+         return false; 
+    	
     }
     
     
@@ -168,9 +218,46 @@ public class CourseSchedulerUtil<T> {
      * @throws Exception when courses can't be completed in any order
      */
     public List<T> getSubjectOrder() throws Exception {
-        //TODO: implement this method
+        Set<T> keySet = this.graphImpl.getAllVertices();
+        
+        int numCourses = keySet.size();
+        
+        boolean visited[] = new boolean[numCourses];
+        
+        Iterator<T> courseIterator = keySet.iterator();
+        
+        
+        T course = courseIterator.next();
+        
+        getSubjectOrderUtil(numCourses, visited, course);
+        
         return null;
 
+    }
+    
+    private void getSubjectOrderUtil(int numCourse, boolean visited[], T course) {
+    	
+    		visited[numCourse] = true;
+    		
+    		System.out.print(course + ", ");
+    		
+    		
+    		List<T> adjVerts = this.graphImpl.getAdjacentVerticesOf(course);
+    		
+    		Iterator<T> adjVertIterator = adjVerts.iterator();
+    		
+    		while (adjVertIterator.hasNext()) {
+    			
+    			T nextCourse = adjVertIterator.next();
+    			int n = numCourse + 1;
+    			
+    			while (!visited[n]) {
+    				getSubjectOrderUtil(n, visited, nextCourse);
+    			}
+    			
+    		}
+	
+    	
     }
 
         
