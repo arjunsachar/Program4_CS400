@@ -35,7 +35,6 @@ public class CourseSchedulerUtil<T> {
      * Graph object
      */
     private GraphImpl<T> graphImpl;
-    private T[] prerequisites; 
     
     
     /**
@@ -44,7 +43,6 @@ public class CourseSchedulerUtil<T> {
     public CourseSchedulerUtil() {
         this.graphImpl = new GraphImpl<T>();
     }
-    
     
     /**
     * createEntity method is for parsing the input json file 
@@ -55,49 +53,55 @@ public class CourseSchedulerUtil<T> {
     @SuppressWarnings("rawtypes")
     public Entity[] createEntity(String fileName) throws Exception {
         JSONParser parser = new JSONParser();
-        
-        try {
-        	
+        try {     	
+                // Sets up the 2 iterators we need for the 2 JSONArrays in the formatting
+                // Also sets up the parsing and starting JSONobject and JSONArray
         		Object obj = parser.parse(new FileReader(fileName));
-        		JSONObject jsonObject = (JSONObject) obj;
-        		
+        		JSONObject jsonObject = (JSONObject) obj;		
         		JSONArray courseArray = (JSONArray) jsonObject.get("courses");
-        		
-        		Iterator<String> iterator = courseArray.iterator();
-        		
+        		Iterator iterator1 = courseArray.iterator();
+        		Iterator iterator2;
+        		//Our entity[] and the counter for entities
         		Entity[] courseInfoArray = new Entity[100];
-        		
-        		int counter = 0;
-        		
-        		while (iterator.hasNext()) {
-        			iterator.next();
-        			
-        			Entity<String> newEnt = new Entity<String>();
-        			
-        			String course = (String) jsonObject.get("name");
-        			System.out.println("COURse :" + course);
-        			prerequisites = (T[])jsonObject.get("prerequisites");
-        			
-        			newEnt.setName(course);
-        			System.out.println("setName :" + newEnt.getName());
-        			
-        			newEnt.setPrerequisites((String[])prerequisites);
-        			
-        			courseInfoArray[counter] = newEnt;
-        			
-        			counter++;
-        			
-        			
-        		}
-        		
-        		// TESTING REMOVE LATER
-        		Entity[] finalCourseArray = null;
-        		for(int i = 0; i < courseInfoArray.length; ++i){
-        		    if(courseInfoArray[i] != null){
-                        System.out.println(courseInfoArray[i]);
+                int mainCounter = 0;
+                
+                // Iterates the JSONArray of courses 
+        		while (iterator1.hasNext()) {    
+        		    //Makes a new entity to store info in
+                    Entity<String> newEnt = new Entity<String>();
+                    int counter = 0;
+                    
+                    //Gets the course name
+        		    JSONObject currCourse = (JSONObject) iterator1.next();
+        		    String courseName = (String) currCourse.get("name");
+        		    
+        		    //Gets a JSONArray of the prerequisites
+        		    JSONArray preReq = (JSONArray) currCourse.get("prerequisites");
+        		    iterator2 = preReq.iterator();		    
+                    String[] prerequisites = new String[100];
+                    
+                    //Iterates through the JSONArray of prerequisites and saves it to a normal array
+        		    while(iterator2.hasNext()){    		        
+        		        prerequisites[counter] = (String) iterator2.next();
+                        counter++; 
         		    }
-
+        		    //Condenses the prereq array to only what we need
+        		    String[] finalPreReqArray = new String[counter];
+                    for(int i = 0; i < counter; ++i){
+                        finalPreReqArray[i] = prerequisites[i];
+                    }        		    
+        		    // Sets the name and prereqs of the entity item and puts the entity into
+        		    // the final array
+        		    newEnt.setName(courseName);
+        		    newEnt.setPrerequisites(finalPreReqArray);
+        		    courseInfoArray[mainCounter] = newEnt;
+        		    ++mainCounter;
         		}
+        		//Condenses the entity array to ones that are filed
+                Entity[] finalEntityArray = new Entity[mainCounter];
+                for(int i = 0; i < mainCounter; ++i){
+                    finalEntityArray[i] = courseInfoArray[i];
+                }
         		return courseInfoArray;
         		
         	
@@ -112,13 +116,26 @@ public class CourseSchedulerUtil<T> {
     
     /**
      * Construct a directed graph from the created entity object 
-     * @param entities which has information about a single course 
+     * @param entities: which has information about a single course 
      * including its name and its prerequisites
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void constructGraph(Entity[] entities) {
         //TODO: implement this method
-
+        // Adds all the vertices of entities 
+        for(int i = 0; i < entities.length; ++i){
+            if(entities[i] != null){
+                graphImpl.addVertex((T)entities[i].getName());
+            }
+        }
+        // Adds an edge between the prerequisites for each vertex
+        for(int i = 0; i < entities.length; ++i){
+            if(entities[i] != null){
+                for(int k = 0; k < entities[i].getPrerequisites().length; ++k){
+                    graphImpl.addEdge((T)entities[i].getName(), (T)entities[i].getPrerequisites()[k]);
+                }
+            }
+        }
     }
     
     
