@@ -83,7 +83,8 @@ public class GraphImpl<T> implements GraphADT<T> {
      */
     public void addEdge(T vertex1, T vertex2) {
         // Will add an edge if given non-null values and edge that isn't already there
-        if(vertex1 != null && vertex2 != null && !verticesMap.get(vertex1).contains(vertex2)){
+        if(vertex1 != null && vertex2 != null && !verticesMap.get(vertex1).contains(vertex2) 
+                        && hasVertex(vertex1) && hasVertex(vertex2)){
             verticesMap.get(vertex1).add(vertex2);
             ++size;
         }
@@ -95,7 +96,8 @@ public class GraphImpl<T> implements GraphADT<T> {
      */
     public void removeEdge(T vertex1, T vertex2) {
         // Will remove edge with using non-null values and an edge already exists
-        if(vertex1 != null && vertex2 != null && verticesMap.get(vertex1).contains(vertex2)){
+        if(vertex1 != null && vertex2 != null && verticesMap.get(vertex1).contains(vertex2)
+                        && hasVertex(vertex1) && hasVertex(vertex2)){
             verticesMap.get(vertex1).remove(vertex2);
             --size;
         }
