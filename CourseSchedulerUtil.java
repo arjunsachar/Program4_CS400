@@ -219,49 +219,40 @@ public class CourseSchedulerUtil<T> {
      * @return the list of courses in the order it has to be taken
      * @throws Exception when courses can't be completed in any order
      */
-    public List<T> getSubjectOrder() throws Exception {
-        Set<T> keySet = this.graphImpl.getAllVertices();
+     public List<T> getSubjectOrder() throws Exception {
+        Stack<T> stack = new Stack<>();
+        Set<T> visited = new HashSet<>();
+        List<T> courses = new LinkedList<T>(graphImpl.getAllVertices());
         
-        int numCourses = keySet.size();
+        for(T node : courses) {
+            if(visited.contains(node)) {
+                continue;
+            } 
+            topologicalOrder(stack, visited, node); 
+        }
         
-        boolean visited[] = new boolean[numCourses];
+        List<T> list = new ArrayList<T>();
         
-        Iterator<T> courseIterator = keySet.iterator();
-        
-        
-        T course = courseIterator.next();
-        
-        getSubjectOrderUtil(numCourses, visited, course);
-        
-        return null;
-
-    }
-    
-    private void getSubjectOrderUtil(int numCourse, boolean visited[], T course) {
-    	
-    		visited[numCourse] = true;
-    		
-    		System.out.print(course + ", ");
-    		
-    		
-    		List<T> adjVerts = this.graphImpl.getAdjacentVerticesOf(course);
-    		
-    		Iterator<T> adjVertIterator = adjVerts.iterator();
-    		
-    		while (adjVertIterator.hasNext()) {
-    			
-    			T nextCourse = adjVertIterator.next();
-    			int n = numCourse + 1;
-    			
-    			while (!visited[n]) {
-    				getSubjectOrderUtil(n, visited, nextCourse);
-    			}
-    			
-    		}
-	
-    	
+        while(!stack.isEmpty()) {
+            list.add(stack.pop());
+        }
+        Collections.reverse(list);
+        return list;
     }
 
+    private void topologicalOrder(Stack<T> stack, Set<T> visited, T node) {
+        List<T> neighbors = new LinkedList<T>();
+        neighbors.addAll(graphImpl.getAdjacentVerticesOf(node));
+        visited.add(node);
+        
+        for(T nodeOrder : neighbors) {
+            if(visited.contains(nodeOrder)) {
+                continue;
+            }
+            topologicalOrder(stack, visited, nodeOrder);
+        }
+        stack.add(node);
+    }
      /**
      * The minimum course required to be taken for a given course
      * @param courseName 
