@@ -35,6 +35,8 @@ public class CourseSchedulerUtil<T> {
      * Graph object
      */
     private GraphImpl<T> graphImpl;
+    private ArrayList<T> unfinished;
+    private ArrayList<T> finished;
     
     
     /**
@@ -260,16 +262,32 @@ public class CourseSchedulerUtil<T> {
     	
     }
 
-        
-    /**
+     /**
      * The minimum course required to be taken for a given course
      * @param courseName 
      * @return the number of minimum courses needed for a given course
      */
     public int getMinimalCourseCompletion(T courseName) throws Exception {
-        //TODO: implement this method
-        return -1;
+        if(!canCoursesBeCompleted()) return -1;
         
+        List<T> done = new ArrayList<>();
+        Queue<T> queue = new PriorityQueue();
+        queue.add(courseName);
+        int counter = 0;
+        
+        // iterative algorithm to find minimum path
+        while(!queue.isEmpty()) {
+            T current = queue.remove();
+            // for each prerequisite node, visit the vertices and add to list
+            for(T node : graphImpl.getAdjacentVerticesOf(current)) {
+                if(!finished.contains(node)) {
+                    finished.add(node);
+                    counter++;
+                    queue.add(node);
+                }
+            }
+        }
+        return counter;
     }
     
 }
