@@ -50,6 +50,7 @@ public class CourseSchedulerUtil<T> {
         this.graphImpl = new GraphImpl<T>();
     }
     
+    
     /**
     * createEntity method is for parsing the input json file 
     * @return array of Entity object which stores information 
@@ -87,7 +88,7 @@ public class CourseSchedulerUtil<T> {
                     String[] prerequisites = new String[100];
                     
                     //Iterates through the JSONArray of prerequisites and saves it to a normal array
-        		    while(iterator2.hasNext()){    		        
+        		    while(iterator2.hasNext()){
         		        prerequisites[counter] = (String) iterator2.next();
                         counter++; 
         		    }
@@ -102,6 +103,27 @@ public class CourseSchedulerUtil<T> {
         		    newEnt.setPrerequisites(finalPreReqArray);
         		    courseInfoArray[mainCounter] = newEnt;
         		    ++mainCounter;
+        		}
+        		//Add prereqs that arent already entities to entity array
+        		// Go through array of courses
+        		for(int i = 0; i < courseInfoArray.length; ++i){
+        		    if(courseInfoArray[i] != null){
+        		        //Get prereq of those courses
+        		        for(String preReq :(String[])courseInfoArray[i].getPrerequisites()){
+        		            for(int k = 0; k < courseInfoArray.length; ++k){
+        		                if(courseInfoArray[k] != null && preReq != null){
+        		                    //Check if prereqs are already a part of entities if not add 
+            		                if(!preReq.equals(courseInfoArray[k].getName())){
+            		                    Entity<String> aEnt = new Entity<String>();
+            		                    aEnt.setName(preReq);
+            		                    aEnt.setPrerequisites(new String[0]);
+            		                    courseInfoArray[mainCounter] = aEnt;
+            		                    ++mainCounter;
+            		                }
+        		                }
+        		            }
+        		        }
+        		    }
         		}
         		//Condenses the entity array to ones that are filed
                 Entity[] finalEntityArray = new Entity[mainCounter];
@@ -250,6 +272,7 @@ public class CourseSchedulerUtil<T> {
      */
     public int getMinimalCourseCompletion(T courseName) throws Exception {
         if(!canCoursesBeCompleted()) return -1;
+        finished = new ArrayList<T>();
         
         List<T> done = new ArrayList<>();
         Queue<T> queue = new PriorityQueue();
