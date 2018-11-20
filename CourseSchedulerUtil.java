@@ -1,16 +1,20 @@
 
+
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
@@ -35,8 +39,8 @@ public class CourseSchedulerUtil<T> {
      * Graph object
      */
     private GraphImpl<T> graphImpl;
-    private ArrayList<T> unfinished;
     private ArrayList<T> finished;
+    private ArrayList<T> unfinished;
     
     
     /**
@@ -143,74 +147,60 @@ public class CourseSchedulerUtil<T> {
     
     /**
      * Returns all the unique available courses
-     * @return the sorted list of all available courses
+     * @return the set of all available courses
      */
-    public Set<T> getAllCourses() {
+    public Set<T> getAllCourses() { 
+        return graphImpl.getAllVertices();
+    }
+    /**
+     * 
+     */
+    private void topologicalOrder(){
         
-        return null;
     }
     
-  /**
+    
+    /**
      * To check whether all given courses can be completed or not
      * @return boolean true if all given courses can be completed,
      * otherwise false
      * @throws Exception
      */
     public boolean canCoursesBeCompleted() throws Exception {
-    	    Set<T> keySet = this.graphImpl.getAllVertices();
-        
+        Set<T> keySet = this.graphImpl.getAllVertices();
         int numCourses = keySet.size();
-    	
-    		// Mark all the vertices as not visited and 
-        // not part of recursion stack 
-        boolean[] visited = new boolean[numCourses]; 
-        boolean[] recStack = new boolean[numCourses]; 
-        
         Iterator<T> courseIterator = keySet.iterator();
           
-        // Call the recursive helper function to 
-        // detect cycle in different DFS trees 
+        // Call the recursive helper function
         for (int i = 0; i < numCourses; i++) {
-        		
-        		T newCourse = courseIterator.next();
-        	
-            if (canCoursesBeCompletedUtil(newCourse, visited, recStack, i)) { 
-                return true; 
+            ArrayList<String> visited = new ArrayList<String>();
+            T newCourse = courseIterator.next();
+            if (canCoursesBeCompletedUtil(newCourse, visited)) { 
+                return false; 
             }
         }
-  
-        return false; 
-
-
+        return true; 
     }
-    
-    private boolean canCoursesBeCompletedUtil(T course, boolean[] visited, boolean[] recStack, int counter) {
-    		if (recStack[counter]) {
-             return true;
-    		}
-   
-         if (visited[counter]) {
-             return false;
-         }
-               
-         visited[counter] = true; 
-   
-         recStack[counter] = true; 
-         
-         
+    /**
+     * Helper method to recursively detect a cycle if a course is visited twice
+     * @param course: course currently being looked at
+     * @param visited: list of courses already visited
+     * @return true if there is a cycle
+     */
+    private boolean canCoursesBeCompletedUtil(T course, ArrayList<String> visited) {            
          List<T> children = this.graphImpl.getAdjacentVerticesOf(course); 
-           
+         // If the current course name is on the list of visited courses for the main course
+         for(String name : visited){
+             if(name.equals(course)){return true;};
+         }
+         visited.add((String)course);
          for (T i: children) {
-        	 	counter++;
-             if (canCoursesBeCompletedUtil(i, visited, recStack, counter)) {
+             if (graphImpl.hasVertex(i) && canCoursesBeCompletedUtil(i, visited)) {
                  return true; 
              }
          }
-                   
-         recStack[counter] = false; 
-   
          return false; 
-    	
+        
     }
     
     
